@@ -1,8 +1,11 @@
 import torch
 import torch.nn as nn
+import torch.optim as optim
 import torch.nn.functional as F
 from torchvision import models
+from collections import OrderedDict
 
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 nclasses = 43 # GTSRB as 43 classes
     
 #### MODEL 1 : MOBILENET ####
@@ -36,7 +39,7 @@ custom_classifier = nn.Sequential(OrderedDict([
 model_densenet.classifier = custom_classifier
 
 state_dict = torch.load('./densenet.pth', map_location=torch.device(device))
-model_dense.load_state_dict(state_dict)
+model_densenet.load_state_dict(state_dict)
 
 
 #### MODEL 3 : ENSEMBLE ####
@@ -55,7 +58,7 @@ class MyEnsemble(nn.Module):
         x = F.log_softmax(out, dim=1)
         return x
 
-model = MyEnsemble(model_dense, model_mobilenet)
+model = MyEnsemble(model_densenet, model_mobilenet)
 
 ## Freeze the weights of the individual models. Only change the prediction averaging weight.
 for pid, param in enumerate(model.parameters()):
