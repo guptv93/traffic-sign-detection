@@ -10,21 +10,24 @@ import torch.nn.functional as F
 import torchvision.datasets as datasets
 
 from data import initialize_data # data.py in the same folder
-from model import Net
+from model import model
 
 parser = argparse.ArgumentParser(description='PyTorch GTSRB evaluation script')
 parser.add_argument('--data', type=str, default='data', metavar='D',
                     help="folder where data is located. train_data.zip and test_data.zip need to be found in the folder")
-parser.add_argument('--model', type=str, metavar='M',
+parser.add_argument('--model', type=str, default='ensemble.pth', metavar='M',
                     help="the model file to be evaluated. Usually it is of the form model_X.pth")
 parser.add_argument('--outfile', type=str, default='gtsrb_kaggle.csv', metavar='D',
                     help="name of the output csv file")
 
 args = parser.parse_args()
 
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
+
 state_dict = torch.load(args.model)
-model = Net()
 model.load_state_dict(state_dict)
+model.to(device)
 model.eval()
 
 from data import data_transforms
@@ -40,21 +43,23 @@ def pil_loader(path):
 
 output_file = open(args.outfile, "w")
 output_file.write("Filename,ClassId\n")
-for f in tqdm(os.listdir(test_dir)):
-    if 'ppm' in f:
-        data = data_transforms(pil_loader(test_dir + '/' + f))
-        data = data.view(1, data.size(0), data.size(1), data.size(2))
-        data = Variable(data, volatile=True)
-        output = model(data)
-        pred = output.data.max(1, keepdim=True)[1]
 
-        file_id = f[0:5]
-        output_file.write("%s,%d\n" % (file_id, pred))
+with torch.no_grad():
+    for f in tqdm(os.listdir(test_dir)):
+        if 'ppm' in f:
+            data = data_transforms(pil_loader(test_dir + '/' + f))
+            data.to(device)
+            data = data.view(1, data.size(0), data.size(1), data.size(2))
+            output = model(data)
+            pred = output.data.max(1, keepdim=True)[1]
+
+            file_id = f[0:5]
+            output_file.write("%s,%d\n" % (file_id, pred))
 
 output_file.close()
 
 print("Succesfully wrote " + args.outfile + ', you can upload this file to the kaggle '
-      'competition at https://www.kaggle.com/c/nyu-cv-fall-2018/')
+      'competition at https://www.kaggle.com/c/nyucvfall2019')
         
 
 
