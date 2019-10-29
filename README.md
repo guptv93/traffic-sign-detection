@@ -26,4 +26,6 @@ You can take one of the checkpoints and run:
 python evaluate.py --model ensemble.pth --data [data_dir]
 ```
 
-The code uses three checkpoint files. One for the DenseNet model, one for the MobileNet model and one for the Ensemble model.
+The code uses three checkpoint files. One for the DenseNet model, one for the MobileNet model and one for the Ensemble model. Download the `.pth` files from the below link and put them in the root folder before running `main.py` or `evaluate.py`.
+
+Link to PTH files : https://drive.google.com/open?id=1mu37TaIeB4KFb1iSx2mBIfncl2ByDZFY
