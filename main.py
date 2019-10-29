@@ -7,6 +7,8 @@ import torch.optim as optim
 from torchvision import datasets, transforms
 from torch.autograd import Variable
 
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
 # Training settings
 parser = argparse.ArgumentParser(description='PyTorch GTSRB example')
 parser.add_argument('--data', type=str, default='data', metavar='D',
@@ -26,8 +28,6 @@ parser.add_argument('--log-interval', type=int, default=10, metavar='N',
 args = parser.parse_args()
 
 torch.manual_seed(args.seed)
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-
 
 ### Data Initialization and Loading
 from data import initialize_data, data_transforms # data.py in the same folder

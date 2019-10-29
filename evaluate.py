@@ -12,6 +12,8 @@ import torchvision.datasets as datasets
 from data import initialize_data # data.py in the same folder
 from model import model
 
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
 parser = argparse.ArgumentParser(description='PyTorch GTSRB evaluation script')
 parser.add_argument('--data', type=str, default='data', metavar='D',
                     help="folder where data is located. train_data.zip and test_data.zip need to be found in the folder")
@@ -22,10 +24,7 @@ parser.add_argument('--outfile', type=str, default='gtsrb_kaggle.csv', metavar='
 
 args = parser.parse_args()
 
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-
-
-state_dict = torch.load(args.model)
+state_dict = torch.load(args.model, map_location=torch.device(device))
 model.load_state_dict(state_dict)
 model.to(device)
 model.eval()
@@ -48,8 +47,7 @@ with torch.no_grad():
     for f in tqdm(os.listdir(test_dir)):
         if 'ppm' in f:
             data = data_transforms(pil_loader(test_dir + '/' + f))
-            data.to(device)
-            data = data.view(1, data.size(0), data.size(1), data.size(2))
+            data = data.view(1, data.size(0), data.size(1), data.size(2)).to(device)
             output = model(data)
             pred = output.data.max(1, keepdim=True)[1]
 
