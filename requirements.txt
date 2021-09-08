@@ -1,6 +1,6 @@
 ## The following requirements were added by pip freeze:
 numpy==1.17.3
-Pillow==6.2.0
+Pillow==8.3.2
 six==1.12.0
 torch==1.2.0
 torchvision==0.4.1
